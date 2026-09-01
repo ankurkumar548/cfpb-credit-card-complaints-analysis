@@ -1,456 +1,842 @@
-# Retail Sales Performance Analytics Dashboard
+# CFPB Credit Card Complaints Analysis
 
 ## 📌 Project Overview
 
-This project presents an interactive **Power BI Retail Sales Performance Dashboard** developed for a fictional retail company, **Electro Hub**.
+This project presents an end-to-end **Data Analytics analysis of Credit Card Consumer Complaints** using data from the **Consumer Financial Protection Bureau (CFPB)**.
 
-The dashboard analyzes **3,510 transactions**, **50 customers**, and **30 products**, representing approximately **₹122.31 million in net sales**.
+The project follows a complete analytics workflow:
 
-The main objective of this project is to transform raw retail data into meaningful business insights and help management understand:
+**Raw Data → Python/Pandas Cleaning → MySQL Analysis → Power BI Dashboard → Business Insights**
 
-- Sales performance
-- Profitability
-- Product performance
-- Category performance
-- Sales trends over time
-- Discount patterns
-- Regional performance
-- Top and bottom-performing products
+The objective is to analyze consumer complaints and identify:
 
----
-
-## 🎯 Business Questions
-
-The dashboard was designed to answer questions such as:
-
-- Which products generate the highest sales?
-- Which products generate the lowest sales?
-- Which products generate the highest and lowest profit?
-- How do sales change monthly, quarterly, and annually?
-- Which categories contribute the most revenue?
-- What is the relationship between sales and profit?
-- What is the average discount offered across categories?
-- How do sales, profit, and quantity sold compare between selected periods?
-- Which products and regions perform best?
+- Major complaint issues
+- Companies receiving the highest complaint volumes
+- Complaint trends over time
+- Geographic complaint patterns
+- Complaint submission channels
+- Company response performance
+- Timely vs untimely responses
+- Average time taken to send complaints to companies
 
 ---
 
-## 📊 Dataset Summary
+# 🎯 Business Questions
 
-| Metric | Value |
-|---|---:|
-| Transactions | 3,510 |
-| Customers | 50 |
-| Products | 30 |
-| Net Sales | ₹122.31M |
-| Leading Category | Electronics |
-| Electronics Net Sales | ₹90.11M |
-| Electronics Revenue Contribution | ~75% |
+The project was designed to answer questions such as:
 
-The dataset contains products from categories including:
-
-- Electronics
-- Footwear
-- Home Appliances
-- Clothing
-- Accessories
-- Kitchenware
-- Bags
-- Personal Care
+1. How many credit card complaints were received?
+2. Which companies received the highest number of complaints?
+3. What are the most common complaint issues?
+4. Which states generate the highest complaint volumes?
+5. How do complaints vary month by month?
+6. Which channels are most commonly used to submit complaints?
+7. What percentage of complaints receive timely responses?
+8. Which companies have untimely responses?
+9. How long does it take for complaints to be sent to companies?
+10. Which states have the highest average complaint forwarding time?
+11. How do companies respond to consumers?
+12. Which companies or issues may require deeper investigation?
 
 ---
 
-## 🛠️ Tools & Technologies
+# 🛠️ Tools & Technologies
 
-- Microsoft Power BI
+- Python
+- Pandas
+- NumPy
+- MySQL
+- SQL
+- Power BI
 - Power Query
 - DAX
-- Star Schema Data Modelling
-- Fact and Dimension Tables
-- Top-N Filters
-- Slicers
-- Maps
-- Time-Series Visualizations
+- Jupyter Notebook
 - Data Cleaning
 - Data Transformation
+- Feature Engineering
 - Exploratory Data Analysis
-- Business Intelligence
+- Dashboard Development
+- Business Analytics
 
 ---
 
-# 🔄 Data Cleaning & Transformation
+# 🔄 Project Workflow
 
-Data preparation was mainly performed using **Power Query**.
-
-Important steps included:
-
-- Importing raw data into Power BI
-- Checking and correcting data types
-- Converting identifier columns to appropriate data types
-- Handling missing values
-- Merging information from related tables
-- Recovering missing price information where required
-- Calculating sales-related fields
-- Standardizing column names
-- Preparing tables for dimensional modelling
-
----
-
-# ⭐ Data Model
-
-The project uses a **Star Schema**.
-
-## Fact Table
-
-The central Sales / Fact table contains transaction-level information such as:
-
-- Customer ID
-- Product ID
-- Promotion ID
-- Units Sold
-- Price per Unit
-- Discount
-- Sales
-- Net Sales
-- Profit
-- Transaction Date
-
-## Dimension Tables
-
-The project contains dimension tables such as:
-
-- Dim Customer
-- Dim Product
-- Dim Promotion
-
-The dimension tables are connected to the Sales fact table using **one-to-many relationships**.
+```text
+CFPB Credit Card Complaint Dataset
+                ↓
+          Python / Pandas
+     Data Cleaning & Transformation
+                ↓
+              MySQL
+         SQL Data Analysis
+                ↓
+            Power BI
+   Dashboard & KPI Development
+                ↓
+         Business Insights
+```
 
 ---
 
-# 🧮 DAX Measures
+# 📂 Dataset
 
-DAX was used to create important business KPIs and analytical measures.
+The project uses consumer complaint data related to **credit card products** from the CFPB Consumer Complaint Database.
 
-Examples include:
+Important fields used include:
 
-- Total Sales
-- Net Sales
-- Total Profit
-- Quantity Sold
-- Average Discount
-- Category Sales
-- Product Sales
-- Period Comparison
-- Top-N Products
-- Bottom-N Products
+- Complaint ID
+- Date Received
+- Date Sent to Company
+- Product
+- Sub-product
+- Issue
+- Sub-issue
+- Company
+- State
+- ZIP Code
+- Submitted Via
+- Company Response to Consumer
+- Timely Response
+- Consumer Complaint Narrative
+- Company Public Response
+- Tags
 
-Example DAX calculation:
+---
 
-```DAX
-Total Sales =
-SUMX(
-    Sales,
-    Sales[Price Per Unit] * Sales[Units Sold]
+# 📊 Dataset / Dashboard Summary
+
+| Metric | Result |
+|---|---:|
+| Total Complaints | 75,989 |
+| Timely Complaints | 75,851 |
+| Untimely Complaints | 138 |
+| Average Days to Send | 0.49 Days |
+| Largest Submission Channel | Web |
+| Web Complaints | 69,852 |
+| Web Share | 91.92% |
+| Highest Complaint State | Texas |
+| Texas Complaints | ~10.2K |
+| Highest Monthly Complaint Volume | August |
+| August Complaints | ~7.4K |
+
+---
+
+# 🧹 Data Cleaning Using Python
+
+The raw dataset was cleaned and transformed using **Python and Pandas** before performing SQL analysis and dashboard development.
+
+---
+
+## 1. Column Name Standardization
+
+Column names were standardized by:
+
+- Removing leading and trailing spaces
+- Converting names to lowercase
+- Replacing spaces with underscores
+- Removing unnecessary special characters
+
+```python
+df.columns = (
+    df.columns
+      .str.strip()
+      .str.lower()
+      .str.replace(" ", "_")
+      .str.replace("?", "", regex=False)
 )
 ```
 
 ---
 
-# 📊 Dashboard Screenshots
+## 2. Date Conversion
 
-## Dashboard Overview
+The following columns were converted into proper datetime format:
 
-![Dashboard Overview](dashboard-overview.jpeg)
+- `date_received`
+- `date_sent_to_company`
 
-The dashboard overview provides a high-level summary of major sales KPIs and helps users quickly understand overall business performance.
+```python
+df["date_received"] = pd.to_datetime(
+    df["date_received"],
+    errors="coerce",
+    utc=True
+)
 
----
-
-## Dashboard Filters
-
-![Dashboard Filters](dashboard-filters.jpeg)
-
-Interactive filters and slicers allow users to analyze performance across different products, categories, customers, regions, and periods.
-
----
-
-## Sales Trend Analysis
-
-![Sales Trend Analysis](sales-trend-analysis.jpeg)
-
-The time-series analysis shows how sales change across different periods and helps identify trends and seasonality.
+df["date_sent_to_company"] = pd.to_datetime(
+    df["date_sent_to_company"],
+    errors="coerce",
+    utc=True
+)
+```
 
 ---
 
-## Period Comparison
+## 3. Missing Value Handling
 
-![Period Comparison](period-comparison.jpeg)
+Missing categorical values were replaced with meaningful labels.
 
-The period comparison dashboard allows users to compare sales, profit, and quantity sold between two selected time periods.
+```python
+categorical_columns = [
+    "sub_product",
+    "sub_issue",
+    "company_public_response",
+    "state",
+    "zip_code",
+    "tags"
+]
 
----
+for col in categorical_columns:
+    df[col] = df[col].fillna("Not Provided")
+```
 
-## Sales Comparison
+Missing complaint narratives were handled separately.
 
-![Sales Comparison](sales-comparison.jpeg)
-
-This section helps compare important business metrics and understand differences in sales performance.
-
----
-
-## Sales Data Table
-
-![Sales Data Table](sales-data-table.jpeg)
-
-The detailed data table allows users to inspect transaction-level information and analyze individual sales records.
-
----
-
-# 📈 Dashboard Features
-
-## Sales Overview
-
-The dashboard displays important KPIs such as:
-
-- Total Sales
-- Net Sales
-- Profit
-- Quantity Sold
-- Number of Customers
-- Number of Products
+```python
+df["consumer_complaint_narrative"] = (
+    df["consumer_complaint_narrative"]
+    .fillna("Narrative Not Available")
+)
+```
 
 ---
 
-## Product Analysis
+## 4. Text Standardization
 
-The dashboard identifies:
+Important text columns were cleaned and standardized.
 
-- Top 5 products by sales
-- Bottom 5 products by sales
-- Top 5 products by profit
-- Bottom 5 products by profit
-- Top products by quantity sold
+These included:
 
-This helps management identify both high-performing and underperforming products.
+- Product
+- Sub-product
+- Issue
+- Sub-issue
+- Company
+- State
+- Submitted Via
+- Company Response to Consumer
+- Timely Response
 
----
+The cleaning process included:
 
-## Category Analysis
-
-The dashboard analyzes:
-
-- Sales by category
-- Profit by category
-- Average discount by category
-- Revenue contribution by category
-
----
-
-## Time-Series Analysis
-
-Sales can be analyzed across:
-
-- Monthly trends
-- Quarterly trends
-- Annual trends
-
-This helps identify:
-
-- Growth patterns
-- Seasonal changes
-- Sales fluctuations
+- Removing unnecessary spaces
+- Standardizing text formatting
+- Handling inconsistent values
 
 ---
 
-## Period Comparison
+## 5. ZIP Code Cleaning
 
-Users can compare:
+ZIP code values were standardized by:
 
-- Sales
-- Profit
-- Quantity Sold
-
-between different selected periods.
-
----
-
-## Regional Analysis
-
-Map-based visualizations help identify regional differences in sales performance.
-
-This can help management understand:
-
-- High-performing regions
-- Low-performing regions
-- Geographic concentration of sales
+- Converting values to strings
+- Removing `.0`
+- Validating ZIP code formats
+- Keeping valid 3–5 digit values
+- Replacing invalid values with `Not Provided`
 
 ---
 
-## Sales vs Profit Analysis
+## 6. Timely Response Cleaning
 
-The dashboard analyzes the relationship between sales and profit.
+The `timely_response` column was standardized to:
 
-This is useful because:
+```text
+Yes
+No
+Unknown
+```
 
-> High sales do not always guarantee high profitability.
+Unexpected values were classified as `Unknown`.
 
-The analysis helps identify products that generate high revenue but comparatively lower profit.
+---
+
+## 7. Duplicate Removal
+
+Duplicate complaints were removed using the unique complaint identifier.
+
+```python
+df = df.drop_duplicates(subset=["complaint_id"])
+```
+
+---
+
+# ⚙️ Feature Engineering
+
+Additional columns were created to enable time-based and operational analysis.
+
+---
+
+## Date Features
+
+```python
+df["received_year"] = df["date_received"].dt.year
+
+df["received_month"] = df["date_received"].dt.month
+
+df["month_name"] = df["date_received"].dt.month_name()
+
+df["received_quarter"] = (
+    "Q" + df["date_received"].dt.quarter.astype(str)
+)
+
+df["day_name"] = df["date_received"].dt.day_name()
+```
+
+These fields allow analysis by:
+
+- Year
+- Month
+- Quarter
+- Day of week
+
+---
+
+## Days to Send
+
+A new operational metric called `days_to_send` was created.
+
+```python
+df["days_to_send"] = (
+    df["date_sent_to_company"]
+    - df["date_received"]
+).dt.days
+```
+
+This represents:
+
+**Complaint Received → Complaint Sent to Company**
+
+and helps analyze complaint-processing efficiency.
+
+---
+
+# 🗄️ SQL Analysis Using MySQL
+
+After cleaning, the dataset was loaded into **MySQL** for structured analysis.
+
+Example table:
+
+```text
+cfpb_credit_card_complaints_2024_cleaned
+```
+
+---
+
+## Total Complaints
+
+```sql
+SELECT
+    COUNT(*) AS total_complaints
+FROM cfpb_credit_card_complaints_2024_cleaned;
+```
+
+---
+
+## Complaints by Company
+
+```sql
+SELECT
+    company,
+    COUNT(*) AS complaint_count
+FROM cfpb_credit_card_complaints_2024_cleaned
+GROUP BY company
+ORDER BY complaint_count DESC;
+```
+
+---
+
+## Complaints by State
+
+```sql
+SELECT
+    state,
+    COUNT(*) AS complaint_count
+FROM cfpb_credit_card_complaints_2024_cleaned
+GROUP BY state
+ORDER BY complaint_count DESC;
+```
+
+---
+
+## Most Common Issues
+
+```sql
+SELECT
+    issue,
+    COUNT(*) AS complaint_count
+FROM cfpb_credit_card_complaints_2024_cleaned
+GROUP BY issue
+ORDER BY complaint_count DESC;
+```
+
+---
+
+## Issue and Sub-Issue Analysis
+
+```sql
+SELECT
+    issue,
+    sub_issue,
+    COUNT(*) AS complaint_count
+FROM cfpb_credit_card_complaints_2024_cleaned
+GROUP BY issue, sub_issue
+ORDER BY complaint_count DESC;
+```
+
+---
+
+## Complaints by Month
+
+```sql
+SELECT
+    received_month,
+    month_name,
+    COUNT(*) AS complaint_count
+FROM cfpb_credit_card_complaints_2024_cleaned
+GROUP BY received_month, month_name
+ORDER BY received_month;
+```
+
+---
+
+## Complaints by Submission Channel
+
+```sql
+SELECT
+    submitted_via,
+    COUNT(*) AS complaint_count
+FROM cfpb_credit_card_complaints_2024_cleaned
+GROUP BY submitted_via
+ORDER BY complaint_count DESC;
+```
+
+---
+
+## Timely Response Rate
+
+```sql
+SELECT
+    ROUND(
+        100.0 *
+        SUM(
+            CASE
+                WHEN timely_response = 'Yes'
+                THEN 1
+                ELSE 0
+            END
+        )
+        / COUNT(*),
+        2
+    ) AS timely_response_rate
+FROM cfpb_credit_card_complaints_2024_cleaned;
+```
+
+---
+
+## Average Days to Send Complaint
+
+```sql
+SELECT
+    AVG(days_to_send) AS avg_days_to_send
+FROM cfpb_credit_card_complaints_2024_cleaned
+WHERE days_to_send > 0;
+```
+
+---
+
+# 📊 Power BI Dashboard
+
+The cleaned dataset was used to create multiple interactive **Power BI dashboards**.
+
+The dashboards analyze:
+
+- Complaint volume
+- Complaint trends
+- Companies
+- Issues
+- Geographic distribution
+- Submission channels
+- Company responses
+- Timely responses
+- Operational performance
+
+---
+
+# 📈 Important KPIs
+
+The dashboard includes KPI cards such as:
+
+- Total Complaints
+- Timely Response Rate
+- Average Days to Send
+- Timely Complaints
+- Untimely Complaints
+- Company Complaint Volume
+
+---
+
+# 📅 Date Table
+
+A dedicated date table was created using DAX.
+
+```DAX
+DateTable =
+CALENDAR(
+    MIN(Complaints[date_received]),
+    MAX(Complaints[date_received])
+)
+```
+
+Additional calculated columns included:
+
+```DAX
+Year =
+YEAR(DateTable[Date])
+```
+
+```DAX
+Month Number =
+MONTH(DateTable[Date])
+```
+
+```DAX
+Month Name =
+FORMAT(DateTable[Date], "MMMM")
+```
+
+```DAX
+Quarter =
+"Q" & FORMAT(DateTable[Date], "Q")
+```
+
+```DAX
+Day Name =
+FORMAT(DateTable[Date], "dddd")
+```
+
+`Month Name` was sorted using `Month Number` so that months appear in chronological order.
+
+---
+
+# 🖼️ Dashboard Screenshots
+
+## 1. Complaint Overview Dashboard
+
+![Complaint Overview Dashboard](complaints-overview-dashboard.png)
+
+The overview dashboard provides:
+
+- Total complaints
+- Timely response rate
+- Average days to send
+- Monthly complaint trends
+- Complaints by issue
+- Top companies by complaints
+- Submission channel distribution
+
+---
+
+## 2. Company Performance Dashboard
+
+![Company Performance Dashboard](company-performance-dashboard.png)
+
+This dashboard compares:
+
+- Timely complaints
+- Untimely complaints
+- Company response distribution
+- Total complaints
+- Timely response rate
+- Company-level performance
+
+---
+
+## 3. Company Performance Summary
+
+![Company Performance Summary](company-performance-summary.png)
+
+This table provides company-level metrics including:
+
+- Total complaints
+- Timely complaints
+- Untimely complaints
+- Timely response rate
+- Average days to send
+
+---
+
+## 4. Company Response Distribution
+
+![Company Response Distribution](company-response-distribution.png)
+
+This visualization analyzes company responses such as:
+
+- Closed with explanation
+- Closed with non-monetary relief
+- Closed with monetary relief
+- Untimely responses
+
+---
+
+## 5. Geographic Analysis Dashboard
+
+![Geographic Analysis Dashboard](geographic-analysis-dashboard.png)
+
+This dashboard analyzes:
+
+- Complaint distribution across states
+- Top complaint states
+- State-level complaint issues
+- Average days to send by state
+
+It also includes interactive filters for:
+
+- State
+- Company
+- Issue
+- Month
+
+---
+
+## 6. Complaints by Submission Channel
+
+![Complaints by Submission Channel](omplaints-by-submission-channel.png)
+
+The analysis shows that the **Web** is the dominant complaint submission channel.
+
+Approximately:
+
+**69,852 complaints (91.92%)**
+
+were submitted through the web.
+
+Other channels include:
+
+- Phone
+- Referral
+- Postal Mail
+
+> Note: The repository currently contains this image as `omplaints-by-submission-channel.png`. It can later be renamed to `complaints-by-submission-channel.png`.
+
+---
+
+## 7. States with Highest Average Days to Send
+
+![States with Highest Average Days to Send](states-highest-average-days-to-send.png)
+
+This visualization identifies states with higher complaint forwarding times.
+
+Among the displayed locations, **Alaska (AK)** had the highest average days to send at approximately:
+
+**1.89 days**
+
+---
+
+## 8. Top 10 Companies by Complaints
+
+![Top 10 Companies by Complaints](top-10-companies-by-complaints.png)
+
+Major companies receiving high complaint volumes include:
+
+- TransUnion Intermediate Holdings
+- Equifax
+- Experian Information Solutions
+- Capital One
+- Citibank
+- Synchrony Financial
+- JPMorgan Chase
+- American Express
+- Bank of America
+- Bread Financial Holdings
+
+---
+
+## 9. Complaint Distribution Across U.S. States
+
+![Complaint Distribution Across US States](us-complaint-distribution-map.png)
+
+This map provides a geographic view of complaint concentration across the United States.
+
+States with larger complaint volumes are represented by larger map markers.
 
 ---
 
 # 🔍 Key Insights
 
-## 1. Electronics is the Main Revenue Driver
+## 1. Web is the Dominant Submission Channel
 
-Electronics generated approximately:
+Approximately **91.92% of complaints** were submitted through the web.
 
-**₹90.11 million in net sales**
-
-This represents roughly:
-
-**75% of total net sales**
-
-This indicates that Electro Hub is highly dependent on the Electronics category.
+This suggests that digital channels are the primary method consumers use to submit financial complaints.
 
 ---
 
-## 2. Total Net Sales
+## 2. Texas Recorded the Highest Complaint Volume
 
-The analyzed dataset represents approximately:
+Texas recorded approximately:
 
-**₹122.31 million in total net sales**
+**10.2K complaints**
 
----
+followed by states including:
 
-## 3. High-Performing Products
-
-Some of the major high-performing products identified during the analysis include:
-
-- Apple MacBook Air
-- Apple iPhone 14
-- Sony TV
-- Samsung Galaxy S21
-- HP Pavilion
+- California
+- Florida
+- New York
+- Illinois
 
 ---
 
-## 4. Revenue Concentration
+## 3. August Recorded the Highest Monthly Complaint Volume
 
-A relatively small number of products and categories contribute a large percentage of overall revenue.
+Complaint volume peaked at approximately:
 
-This helps management identify:
+**7.4K complaints in August**
 
-- Core revenue-generating products
-- Underperforming products
-- Inventory priorities
-- Promotion priorities
-- Diversification opportunities
+Monthly complaint patterns indicate that complaint volume changes meaningfully throughout the year.
 
 ---
 
-# 💡 Business Recommendations
+## 4. Purchase-Related Problems are a Major Issue
 
-## 1. Protect High-Performing Electronics Products
+One of the most common issues identified was:
 
-Since Electronics contributes a large portion of revenue:
+**Problem with a purchase shown on your statement**
 
-- Maintain sufficient inventory
-- Avoid stock-outs
-- Monitor demand closely
-- Prioritize high-performing products
+with approximately:
 
----
+**14.6K complaints**
 
-## 2. Reduce Dependence on Electronics
+Other major issues included:
 
-Heavy dependence on one category creates business risk.
-
-The company can:
-
-- Promote promising products from other categories
-- Use targeted discounts
-- Run category-specific campaigns
-- Improve product diversification
+- Incorrect information on your report
+- Problems with company investigations
+- Getting a credit card
+- Fees or interest
+- Closing an account
+- Payment-related problems
 
 ---
 
-## 3. Use Top-N and Bottom-N Analysis
+## 5. A Small Number of Companies Account for Large Complaint Volumes
 
-Management can use product rankings to:
+Companies such as:
 
-- Prioritize strong products
-- Review underperforming products
-- Improve inventory allocation
-- Optimize promotional strategies
+- TransUnion
+- Equifax
+- Experian
+- Capital One
+- Citibank
 
----
+appear among the highest complaint-volume companies.
 
-## 4. Monitor Profit Along with Revenue
-
-Products generating high sales may not always generate high profit.
-
-Business decisions should therefore consider both:
-
-**Revenue + Profitability**
+However, complaint volume should not automatically be interpreted as poor company performance because larger companies may also serve significantly larger customer bases.
 
 ---
 
-## 5. Monitor Sales Trends
+## 6. Most Complaints Receive Timely Responses
 
-Monthly, quarterly, and annual trends can help identify:
+Out of **75,989 complaints**:
 
-- Seasonality
-- Growth periods
-- Demand fluctuations
-- Product performance changes
+- Timely complaints: **75,851**
+- Untimely complaints: **138**
+
+This indicates a very high overall timely response rate.
+
+---
+
+## 7. Complaint Forwarding is Generally Fast
+
+The overall average days to send complaints was approximately:
+
+**0.49 days**
+
+However, some states showed higher averages, which may justify deeper investigation.
+
+---
+
+# 💡 Business Value
+
+The analysis can help organizations and analysts:
+
+- Monitor consumer complaint trends
+- Identify common customer pain points
+- Compare complaint patterns across companies
+- Identify geographic complaint concentration
+- Monitor response efficiency
+- Detect operational delays
+- Prioritize high-frequency complaint issues
+- Identify companies requiring deeper investigation
+- Support customer-service improvement initiatives
+- Build data-driven complaint management strategies
 
 ---
 
 # 📁 Repository Structure
 
 ```text
-retail-sales-performance-analytics/
+cfpb-credit-card-complaints-analysis/
 │
 ├── README.md
-├── First project power Bi.pbix
-├── Store+Data (1).xlsx
-├── dashboard-overview.jpeg
-├── dashboard-filters.jpeg
-├── period-comparison.jpeg
-├── sales-comparison.jpeg
-├── sales-data-table.jpeg
-├── sales-trend-analysis.jpeg
-└── top-bottom-5-products.jpeg
+│
+├── Consumer Financial Complaints Analytics & ...
+├── Consumer Financial Complaints Analytics & ...
+│
+├── company-performance-dashboard.png
+├── company-performance-summary.png
+├── company-response-distribution.png
+├── complaints-overview-dashboard.png
+├── geographic-analysis-dashboard.png
+├── omplaints-by-submission-channel.png
+├── states-highest-average-days-to-send.png
+├── top-10-companies-by-complaints.png
+└── us-complaint-distribution-map.png
 ```
 
 ---
 
-# 🚀 How to Use
+# 🚀 How to Use the Project
 
-1. Clone or download the repository.
+## Python
+
+Install the required libraries:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
+pip install pandas numpy jupyter
 ```
 
-2. Open the `.pbix` file using **Microsoft Power BI Desktop**.
+Start Jupyter:
 
-3. If Power BI cannot locate the dataset, update the data source path from:
+```bash
+jupyter notebook
+```
 
-**Transform Data → Data Source Settings**
+Open the project notebook and run the data-cleaning steps.
 
-4. Refresh the dashboard.
+---
 
-5. Use the available filters and slicers to explore:
+## MySQL
 
-- Products
-- Categories
-- Customers
-- Regions
-- Sales
-- Profit
-- Quantity
-- Time-based performance
+1. Create a MySQL database.
+2. Import the cleaned CSV dataset.
+3. Create the complaint table.
+4. Execute the SQL analysis queries.
+5. Validate the results before connecting the data to Power BI.
+
+---
+
+## Power BI
+
+1. Open the project `.pbix` file using **Microsoft Power BI Desktop**.
+2. Update the data source path if necessary.
+3. Refresh the dataset.
+4. Navigate through the dashboard pages.
+5. Use slicers and filters to analyze complaints by:
+   - State
+   - Company
+   - Issue
+   - Month
+   - Response type
 
 ---
 
@@ -458,22 +844,50 @@ git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
 
 This project demonstrates practical knowledge of:
 
-- Power BI
+### Python
+
+- Pandas
+- NumPy
+- Data Cleaning
+- Missing Value Handling
+- Duplicate Removal
+- Datetime Operations
+- Feature Engineering
+
+### SQL
+
+- SELECT
+- WHERE
+- GROUP BY
+- ORDER BY
+- CASE WHEN
+- Aggregations
+- COUNT
+- AVG
+- Date Analysis
+- Business Queries
+
+### Power BI
+
 - Power Query
 - DAX
-- Data Cleaning
-- Data Transformation
-- Star Schema
-- Fact Tables
-- Dimension Tables
-- Data Modelling
-- KPI Development
-- Dashboard Design
-- Top-N Analysis
-- Bottom-N Analysis
+- KPI Cards
+- Slicers
+- Maps
+- Bar Charts
+- Donut Charts
+- Line Charts
+- Tables
 - Time-Series Analysis
-- Business Intelligence
+- Dashboard Development
+
+### Analytics
+
 - Exploratory Data Analysis
+- Trend Analysis
+- Company Analysis
+- Geographic Analysis
+- Operational Analysis
 - Business Insight Generation
 
 ---
@@ -482,16 +896,17 @@ This project demonstrates practical knowledge of:
 
 Through this project, I strengthened my understanding of:
 
-- Cleaning and transforming raw data
-- Building star-schema data models
-- Creating relationships between fact and dimension tables
-- Developing DAX measures
-- Creating business KPIs
-- Designing interactive Power BI dashboards
-- Performing Top-N and Bottom-N analysis
-- Analyzing sales trends over time
-- Translating raw data into meaningful business insights
-- Presenting analytical findings clearly for decision-making
+- Cleaning real-world datasets using Python
+- Handling missing and inconsistent values
+- Creating new analytical features
+- Writing SQL queries for business analysis
+- Translating SQL results into visual insights
+- Creating interactive Power BI dashboards
+- Designing KPIs
+- Performing time-series analysis
+- Analyzing company performance
+- Performing geographic analysis
+- Converting raw data into decision-oriented business insights
 
 ---
 
@@ -499,16 +914,17 @@ Through this project, I strengthened my understanding of:
 
 Possible future improvements include:
 
-- Customer segmentation
-- Customer retention analysis
-- Repeat-customer analysis
-- Profit margin analysis
-- Product-level forecasting
-- Inventory optimization
-- Automated data refresh
-- Advanced DAX time-intelligence measures
-- Drill-through analysis
-- Customer lifetime value analysis
+- Normalizing complaint volume using company customer base
+- Normalizing state complaints using population
+- Complaint narrative text analysis
+- Sentiment analysis
+- Topic modelling
+- Complaint forecasting
+- Automated Power BI refresh
+- Anomaly detection
+- Company benchmarking
+- Root-cause drill-down analysis
+- Complaint severity scoring
 
 ---
 
@@ -521,6 +937,17 @@ National Institute of Technology Agartala
 
 ---
 
-## ⚠️ Disclaimer
+# ⚠️ Disclaimer
 
 This project is intended for **educational, portfolio, and data analytics demonstration purposes**.
+
+Complaint volume alone should **not** be interpreted as a direct measure of company quality.
+
+Different companies may have significantly different:
+
+- Customer bases
+- Market shares
+- Transaction volumes
+- Product portfolios
+
+Therefore, complaint counts should be interpreted alongside relevant business context.
